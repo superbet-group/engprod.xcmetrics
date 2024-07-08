@@ -1,3 +1,6 @@
+**!Repository forked because of a blocker:**
+- https://github.com/spotify/XCMetrics/pull/116
+
 <!-- ![Build Status](docs/img/logo.png) -->
 <p align="center">
     <img src="docs/img/logo.png" width="75%">
