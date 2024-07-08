@@ -1,4 +1,4 @@
-**!Repository forked because of a blocker:**
+**Repository forked because of a blocker:**
 - https://github.com/spotify/XCMetrics/pull/116
 
 <!-- ![Build Status](docs/img/logo.png) -->
