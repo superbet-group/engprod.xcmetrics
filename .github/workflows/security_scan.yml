@@ -1,0 +1,12 @@
+name: Security Scan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  security:
+    uses: superbet-group/sre.action.snyk/.github/workflows/ci-security.yml@master
+    secrets: inherit
+    with:
+      iac: false
