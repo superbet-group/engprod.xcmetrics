@@ -77,10 +77,9 @@ class Configuration {
         return Environment.get("DB_PASSWORD") ?? "xcmetrics-dev"
     }()
 
-    /// If "1", connects to Postgres over TLS. Certificate verification is intentionally skipped
-    /// (equivalent to libpq's `sslmode=require`, not `verify-full`) since RDS/Aurora certificates
-    /// are signed by Amazon's own CA, which isn't in the default trust store. This only satisfies
-    /// an `rds.force_ssl=1` parameter group; it does not authenticate the server.
+    /// If "1", connects to Postgres over TLS, verifying the server certificate against the
+    /// embedded RDS/Aurora CA bundle (see RDSCertificateAuthority.swift). Needed for clusters
+    /// with an `rds.force_ssl=1` parameter group, which reject plaintext connections outright.
     lazy var databaseTLSEnabled: Bool = {
         return (Environment.get("DB_TLS") ?? "0") == "1"
     }()

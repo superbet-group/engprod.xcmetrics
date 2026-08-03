@@ -50,14 +50,15 @@ public func configure(_ app: Application) throws {
 
         app.logger.notice("Connecting to \(config.databaseName) in \(config.databaseHost) as \(config.databaseUser) password length \(config.databasePassword.count)")
 
-        // TLS is opt-in via DB_TLS=1. Certificate verification is intentionally skipped: RDS/Aurora
-        // certs are signed by Amazon's own CA, which isn't in the default trust store, and this app
-        // has no mechanism to supply a root CA bundle. This satisfies an `rds.force_ssl=1` parameter
-        // group (encrypts the connection) without authenticating the server.
+        // TLS is opt-in via DB_TLS=1, verifying the server certificate against the embedded
+        // RDS/Aurora CA bundle (see RDSCertificateAuthority.swift) rather than skipping
+        // verification - `makeClientConfiguration()` already defaults to `.fullVerification`,
+        // it just needs the right trust roots since Amazon's RDS CA isn't in the system store.
         var tlsConfiguration: TLSConfiguration? = nil
         if config.databaseTLSEnabled {
+            let caCertificates = try NIOSSLCertificate.fromPEMBytes(Array(rdsCertificateAuthorityPEM.utf8))
             var tls = TLSConfiguration.makeClientConfiguration()
-            tls.certificateVerification = .none
+            tls.trustRoots = .certificates(caCertificates)
             tlsConfiguration = tls
         }
 
