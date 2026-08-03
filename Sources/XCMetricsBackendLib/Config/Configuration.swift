@@ -77,6 +77,14 @@ class Configuration {
         return Environment.get("DB_PASSWORD") ?? "xcmetrics-dev"
     }()
 
+    /// If "1", connects to Postgres over TLS. Certificate verification is intentionally skipped
+    /// (equivalent to libpq's `sslmode=require`, not `verify-full`) since RDS/Aurora certificates
+    /// are signed by Amazon's own CA, which isn't in the default trust store. This only satisfies
+    /// an `rds.force_ssl=1` parameter group; it does not authenticate the server.
+    lazy var databaseTLSEnabled: Bool = {
+        return (Environment.get("DB_TLS") ?? "0") == "1"
+    }()
+
     lazy var redisHost: String = {
         return Environment.get("REDIS_HOST") ?? "127.0.0.1"
     }()
