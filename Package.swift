@@ -94,6 +94,7 @@ let package = Package(
                 .product(name: "CryptoSwift", package: "CryptoSwift"),
                 .product(name: "GoogleCloudKit", package: "google-cloud-kit"),
                 .product(name: "S3", package: "soto"),
+                .product(name: "NIOSSL", package: "swift-nio-ssl"),
                 "XCMetricsCommon"
             ],
             swiftSettings: [
