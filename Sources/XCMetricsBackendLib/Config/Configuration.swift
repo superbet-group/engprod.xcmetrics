@@ -77,6 +77,13 @@ class Configuration {
         return Environment.get("DB_PASSWORD") ?? "xcmetrics-dev"
     }()
 
+    /// If "1", connects to Postgres over TLS, verifying the server certificate against the
+    /// embedded RDS/Aurora CA bundle (see RDSCertificateAuthority.swift). Needed for clusters
+    /// with an `rds.force_ssl=1` parameter group, which reject plaintext connections outright.
+    lazy var databaseTLSEnabled: Bool = {
+        return (Environment.get("DB_TLS") ?? "0") == "1"
+    }()
+
     lazy var redisHost: String = {
         return Environment.get("REDIS_HOST") ?? "127.0.0.1"
     }()

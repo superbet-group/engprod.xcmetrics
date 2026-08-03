@@ -19,6 +19,7 @@
 
 import Fluent
 import FluentPostgresDriver
+import NIOSSL
 import QueuesRedisDriver
 import Redis
 import Vapor
@@ -49,14 +50,28 @@ public func configure(_ app: Application) throws {
 
         app.logger.notice("Connecting to \(config.databaseName) in \(config.databaseHost) as \(config.databaseUser) password length \(config.databasePassword.count)")
 
-        app.databases.use(.postgres(
+        // TLS is opt-in via DB_TLS=1, verifying the server certificate against the embedded
+        // RDS/Aurora CA bundle (see RDSCertificateAuthority.swift) rather than skipping
+        // verification - `makeClientConfiguration()` already defaults to `.fullVerification`,
+        // it just needs the right trust roots since Amazon's RDS CA isn't in the system store.
+        var tlsConfiguration: TLSConfiguration? = nil
+        if config.databaseTLSEnabled {
+            let caCertificates = try NIOSSLCertificate.fromPEMBytes(Array(rdsCertificateAuthorityPEM.utf8))
+            var tls = TLSConfiguration.makeClientConfiguration()
+            tls.trustRoots = .certificates(caCertificates)
+            tlsConfiguration = tls
+        }
+
+        let postgresConfig = PostgresConfiguration(
             hostname: config.databaseHost,
             port: config.databasePort,
             username: config.databaseUser,
             password: config.databasePassword,
             database: config.databaseName,
-            maxConnectionsPerEventLoop: 10
-        ), as: .psql)
+            tlsConfiguration: tlsConfiguration
+        )
+
+        app.databases.use(.postgres(configuration: postgresConfig, maxConnectionsPerEventLoop: 10), as: .psql)
     }
 
     // Add database migrations
@@ -124,4 +139,3 @@ public func configure(_ app: Application) throws {
     // register routes
     try routes(app)
 }
-
